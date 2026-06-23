@@ -40,10 +40,12 @@ $$;
 -- users policies
 create policy users_select_self_or_admin on public.users
   for select using (id = auth.uid() or public.is_admin());
+-- a user may only create their OWN row, and only as a non-privileged active auditor.
+-- role/status elevation is reserved for admins via the update policy below.
 create policy users_insert_self on public.users
-  for insert with check (id = auth.uid());
+  for insert with check (id = auth.uid() and role = 'auditor' and status = 'active');
 create policy users_update_admin on public.users
-  for update using (public.is_admin());
+  for update using (public.is_admin()) with check (public.is_admin());
 
 -- students: anyone (incl. anon) may read non-deleted; only staff write
 create policy students_select_all on public.students
