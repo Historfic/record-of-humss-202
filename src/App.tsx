@@ -9,10 +9,10 @@ import { GuestGate } from "./components/GuestGate";
 import { AttendanceTab } from "./components/AttendanceTab";
 import { TransparencyTab } from "./components/TransparencyTab";
 import { CalendarTab } from "./components/CalendarTab";
-import { StaffAdmin } from "./components/StaffAdmin";
+import { AdminPanel } from "./components/AdminPanel";
 import { Calculator } from "./components/Calculator";
 
-type View = "Attendance" | "Transparency" | "Calendar" | "Staff";
+type View = "Attendance" | "Transparency" | "Calendar" | "Admin";
 
 const APP_NAME = "Records of HUMSS-202";
 
@@ -97,7 +97,7 @@ export default function App() {
           <nav className="flex flex-col gap-1 border-t border-violet-100 pt-3">
             <NavItem label="Calendar" emoji="🗓️" active={view === "Calendar"} onClick={() => go("Calendar")} />
             {admin && (
-              <NavItem label="Staff" emoji="👥" active={view === "Staff"} onClick={() => go("Staff")} />
+              <NavItem label="Admin" emoji="👑" active={view === "Admin"} onClick={() => go("Admin")} />
             )}
           </nav>
         </div>
@@ -150,7 +150,7 @@ export default function App() {
             {view === "Attendance" && <AttendanceTab />}
             {view === "Transparency" && <TransparencyTab mode="staff" />}
             {view === "Calendar" && <CalendarTab />}
-            {view === "Staff" && <StaffAdmin />}
+            {view === "Admin" && <AdminPanel />}
           </main>
         </div>
 
