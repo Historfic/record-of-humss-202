@@ -12,10 +12,12 @@ Everything you need to do **manually** (the things I can't do for you). Work top
    - `supabase/migrations/0001_foundation.sql`
    - `supabase/migrations/0002_features.sql`
    - `supabase/migrations/0003_sync_columns.sql`
+   - `supabase/migrations/0004_auto_confirm.sql`  ← makes sign-ups work instantly, no email
    Verify in **Table Editor**: you should see `users, students, collections, payments,
    attendance, expenses, calendar_notes, guest_log`.
-3. **Turn OFF email confirmation** — Authentication → **Providers** → **Email** →
-   toggle **Confirm email** OFF → Save. (Stops the "email rate limit" / "not confirmed" errors.)
+3. **Email confirmation:** you do NOT need to touch any dashboard toggle — migration `0004`
+   auto-confirms every new account in the database, so staff can log in the moment they
+   sign up. (No email is required and there's nothing to click at school.)
 
 ## B. Make yourself the admin
 
@@ -79,11 +81,16 @@ npm run dev      # opens http://localhost:5173
 - Tip: each staff member should open the app online once on their phone before relying on
   offline use, so the app and data are cached.
 
-## G. Giving access to treasurer / auditor
+## G. Who needs an account vs. who doesn't
 
-1. They open your deployed link and **Sign up** (email + password).
-2. Their account appears in your **Staff** tab → set their **role** (treasurer/auditor) and
-   **title** → Save. Guests just type a name to view the report (no account).
+- **Classmates = guests = NO account, NO email.** They open your deployed link, tap
+  **"Continue as guest (view only)"**, type their name, and see the Transparency report.
+  That's the only thing they ever do.
+- **Only the treasurer and auditor** make accounts:
+  1. They open your link and **Sign up** (email + password). Thanks to migration `0004`
+     they're logged in immediately — no confirmation step.
+  2. Their account appears in your **Staff** tab → set their **role** (treasurer/auditor)
+     and **title** → Save.
 
 ## H. Push to GitHub (needed for deploy + backup)
 
