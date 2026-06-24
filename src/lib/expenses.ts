@@ -1,4 +1,5 @@
 import { supabase } from "./supabase";
+import { write } from "./db";
 
 export interface Expense {
   id: string;
@@ -27,6 +28,5 @@ export async function listExpenses(): Promise<Expense[]> {
 }
 
 export async function addExpense(input: { description: string; amount_centavos: number; date: string }): Promise<void> {
-  const { error } = await supabase.from("expenses").insert(input);
-  if (error) throw error;
+  await write({ table: "expenses", kind: "insert", payload: input });
 }

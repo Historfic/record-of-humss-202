@@ -1,5 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "./context/AuthContext";
+import { OfflineBanner } from "./components/OfflineBanner";
+import { flushOutbox } from "./lib/db";
 import { isAdmin } from "./lib/roles";
 import type { Role } from "./lib/roles";
 import { AuthForm } from "./components/AuthForm";
@@ -32,6 +34,10 @@ export default function App() {
   const [tab, setTab] = useState<Tab>("Attendance");
   const [calcOpen, setCalcOpen] = useState(false);
 
+  useEffect(() => {
+    void flushOutbox().catch(() => {});
+  }, []);
+
   if (loading) return null;
 
   // Signed-in staff
@@ -50,6 +56,7 @@ export default function App() {
 
     return (
       <div className="pb-16">
+        <OfflineBanner />
         <header className="flex items-center justify-between border-b p-3">
           <strong>Transparency Report</strong>
           <button className="text-sm text-gray-500" onClick={signOut}>
@@ -80,6 +87,7 @@ export default function App() {
   if (guestName) {
     return (
       <div>
+        <OfflineBanner />
         <header className="border-b p-3">
           <strong>Transparency Report</strong> — guest: {guestName}
         </header>

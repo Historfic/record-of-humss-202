@@ -1,4 +1,5 @@
 import { supabase } from "./supabase";
+import { write } from "./db";
 
 export interface Student {
   id: string;
@@ -22,6 +23,5 @@ export async function listStudents(): Promise<Student[]> {
 }
 
 export async function addStudent(name: string): Promise<void> {
-  const { error } = await supabase.from("students").insert({ name });
-  if (error) throw error;
+  await write({ table: "students", kind: "insert", payload: { name } });
 }

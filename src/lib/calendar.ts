@@ -1,4 +1,5 @@
 import { supabase } from "./supabase";
+import { write } from "./db";
 
 export interface CalendarNote {
   id: string;
@@ -26,11 +27,9 @@ export async function listNotes(): Promise<CalendarNote[]> {
 }
 
 export async function addNote(input: { title: string; description: string | null; due_date: string | null }): Promise<void> {
-  const { error } = await supabase.from("calendar_notes").insert(input);
-  if (error) throw error;
+  await write({ table: "calendar_notes", kind: "insert", payload: input });
 }
 
 export async function deleteNote(id: string): Promise<void> {
-  const { error } = await supabase.from("calendar_notes").update({ deleted: true }).eq("id", id);
-  if (error) throw error;
+  await write({ table: "calendar_notes", kind: "update", payload: { deleted: true }, match: { id } });
 }

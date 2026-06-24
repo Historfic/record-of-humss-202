@@ -12,6 +12,8 @@ vi.mock("./components/StaffEntry", () => ({ StaffEntry: () => <div>StaffEntry</d
 vi.mock("./components/CalendarTab", () => ({ CalendarTab: () => <div>CalendarTab</div> }));
 vi.mock("./components/StaffAdmin", () => ({ StaffAdmin: () => <div>StaffAdmin</div> }));
 vi.mock("./components/Calculator", () => ({ Calculator: ({ open }: { open: boolean }) => (open ? <div>Calculator</div> : null) }));
+vi.mock("./components/OfflineBanner", () => ({ OfflineBanner: () => null }));
+vi.mock("./lib/db", () => ({ flushOutbox: vi.fn().mockResolvedValue(0) }));
 import App from "./App";
 
 describe("App routing", () => {

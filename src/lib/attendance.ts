@@ -1,4 +1,5 @@
 import { supabase } from "./supabase";
+import { write } from "./db";
 
 export type AttStatus = "present" | "absent" | "excused" | "cutting";
 
@@ -33,19 +34,13 @@ export async function setAttendance(
   note: string | null = null
 ): Promise<void> {
   if (status === "present") {
-    const { error } = await supabase
-      .from("attendance")
-      .delete()
-      .eq("student_id", studentId)
-      .eq("date", date);
-    if (error) throw error;
+    await write({ table: "attendance", kind: "delete", match: { student_id: studentId, date } });
     return;
   }
-  const { error } = await supabase
-    .from("attendance")
-    .upsert(
-      { student_id: studentId, date, status, note },
-      { onConflict: "student_id,date" }
-    );
-  if (error) throw error;
+  await write({
+    table: "attendance",
+    kind: "upsert",
+    payload: { student_id: studentId, date, status, note },
+    onConflict: "student_id,date",
+  });
 }

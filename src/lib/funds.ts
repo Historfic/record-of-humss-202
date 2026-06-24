@@ -1,4 +1,5 @@
 import { supabase } from "./supabase";
+import { write } from "./db";
 
 export interface Collection {
   id: string;
@@ -45,8 +46,7 @@ export async function addCollection(input: {
   amount_centavos: number;
   date: string;
 }): Promise<void> {
-  const { error } = await supabase.from("collections").insert(input);
-  if (error) throw error;
+  await write({ table: "collections", kind: "insert", payload: input });
 }
 
 export async function recordPayment(input: {
@@ -54,6 +54,5 @@ export async function recordPayment(input: {
   collection_id: string;
   amount_centavos: number;
 }): Promise<void> {
-  const { error } = await supabase.from("payments").insert(input);
-  if (error) throw error;
+  await write({ table: "payments", kind: "insert", payload: input });
 }
