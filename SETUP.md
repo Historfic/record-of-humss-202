@@ -55,21 +55,34 @@ npm run dev      # opens http://localhost:5173
 - **Calendar** → add a project/homework with a deadline.
 - 🧮 floating button → calculator.
 
-## E. Put it online so classmates can use it (deploy)
+## E. Put it online so classmates can use it (deploy to Vercel, named "record")
 
-`localhost` only works on YOUR computer. To share a link with the class, deploy the PWA
-(free). Easiest = **Vercel**:
+`localhost` only works on YOUR computer. To share a link with the class, deploy (free).
 
-1. Push this repo to GitHub (see Section H).
-2. Go to https://vercel.com → **Add New → Project** → import your GitHub repo.
-3. Framework preset: **Vite**. Build command `npm run build`, output dir `dist` (auto-detected).
-4. **Environment Variables** — add the SAME two keys as your `.env.local`:
-   `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`.
-5. **Deploy.** You get a URL like `https://transparency-report.vercel.app`.
-6. Share that link. On a phone: open it → browser menu → **Add to Home Screen** → it
-   installs like an app (icon, fullscreen, offline).
+### E1. Push to GitHub first (Section H), then:
 
-(Netlify works the same way if you prefer it.)
+1. Go to https://vercel.com → sign in with GitHub → **Add New → Project**.
+2. **Import** your `record` GitHub repo.
+3. Project **Name: `record`**. Framework preset: **Vite** (auto-detected; build `npm run build`,
+   output `dist`).
+4. **Environment Variables** — add THREE (the third powers the admin "Add staff" / "Reset
+   password" buttons and must stay server-side):
+
+   | Name | Value | Where to find it |
+   |---|---|---|
+   | `VITE_SUPABASE_URL` | `https://<ref>.supabase.co` | Supabase → Settings → API → Project URL |
+   | `VITE_SUPABASE_ANON_KEY` | the **anon public** key | Supabase → Settings → API |
+   | `SUPABASE_URL` | same as VITE_SUPABASE_URL | (same) |
+   | `SUPABASE_SERVICE_ROLE_KEY` | the **service_role** key ⚠️ secret | Supabase → Settings → API → service_role |
+
+   ⚠️ The **service_role** key is powerful — only paste it into Vercel's env vars, never into
+   `.env.local`, the app, or anywhere public.
+5. **Deploy.** You get `https://record-xxxx.vercel.app`.
+6. Share that link. On a phone: open it → browser menu → **Add to Home Screen** → installs
+   like an app (icon, fullscreen, offline).
+
+> Note: the admin **Add staff** and **Reset password** buttons only work on the deployed
+> Vercel site (they call a secure server function). Everything else also works in `npm run dev`.
 
 ## F. How offline works (what to expect)
 
@@ -94,11 +107,26 @@ npm run dev      # opens http://localhost:5173
 
 ## H. Push to GitHub (needed for deploy + backup)
 
-```
-# create an empty repo on github.com first, then:
-git remote add origin https://github.com/YOUR-USERNAME/transparency-report.git
-git push -u origin master
-```
+1. On https://github.com → **New repository** → name it **`record`** → keep it empty
+   (no README) → **Create**.
+2. In the VS Code terminal (from the project folder), run — replacing YOUR-USERNAME:
+   ```
+   git remote add origin https://github.com/YOUR-USERNAME/record.git
+   git push -u origin master
+   ```
+   (If GitHub asks you to sign in, use the browser popup or a Personal Access Token.)
+3. Done — now do Section E to deploy it on Vercel.
+
+## I. Using the Admin tab (instead of Supabase)
+
+Once deployed, the 👑 **Admin** tab is your control center — you rarely need Supabase again:
+- **Staff** — change roles/titles, **Revoke/Restore** access, **Set new password** for anyone.
+- **Add staff** — create a treasurer/auditor account; you type their password (so you know it).
+- **Who viewed** — the log of classmates who opened the report (name + time).
+- **History** — full money-in / money-out ledger and balance.
+
+Passwords can never be *shown* (they're stored scrambled, by design) — but you set them when
+creating an account and can reset them anytime, so you always control access.
 
 ---
 
