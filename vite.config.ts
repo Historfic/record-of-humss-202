@@ -8,6 +8,22 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: "autoUpdate",
+      workbox: {
+        // Cache Supabase REST reads so the report still loads with no internet.
+        // NetworkFirst: use live data when online, fall back to last-cached when offline.
+        runtimeCaching: [
+          {
+            urlPattern: ({ url }) => url.pathname.includes("/rest/v1/"),
+            handler: "NetworkFirst",
+            method: "GET",
+            options: {
+              cacheName: "supabase-reads",
+              expiration: { maxEntries: 200, maxAgeSeconds: 60 * 60 * 24 * 7 },
+              cacheableResponse: { statuses: [0, 200] },
+            },
+          },
+        ],
+      },
       manifest: {
         name: "Transparency Report",
         short_name: "Fund",
