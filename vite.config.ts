@@ -25,8 +25,8 @@ export default defineConfig({
         ],
       },
       manifest: {
-        name: "Transparency Report",
-        short_name: "Fund",
+        name: "Records of HUMSS-202",
+        short_name: "HUMSS-202",
         start_url: "/",
         display: "standalone",
         background_color: "#ffffff",

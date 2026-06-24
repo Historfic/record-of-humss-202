@@ -1,3 +1,11 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+body {
+  font-family: 'Poppins', system-ui, sans-serif;
+  background: linear-gradient(135deg, #faf5ff 0%, #eff6ff 100%);
+  background-attachment: fixed;
+  min-height: 100vh;
+  color: #1e293b;
+}
