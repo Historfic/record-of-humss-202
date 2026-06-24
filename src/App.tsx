@@ -1,33 +1,77 @@
 import { useState } from "react";
 import { useAuth } from "./context/AuthContext";
 import { isAdmin } from "./lib/roles";
+import type { Role } from "./lib/roles";
 import { AuthForm } from "./components/AuthForm";
 import { GuestGate } from "./components/GuestGate";
-import { RosterList } from "./components/RosterList";
+import { AttendanceTab } from "./components/AttendanceTab";
+import { TransparencyGrid } from "./components/TransparencyGrid";
+import { Ledger } from "./components/Ledger";
+import { StaffEntry } from "./components/StaffEntry";
+import { CalendarTab } from "./components/CalendarTab";
 import { StaffAdmin } from "./components/StaffAdmin";
+import { Calculator } from "./components/Calculator";
+
+type Tab = "Attendance" | "Transparency" | "Ledger" | "Entry" | "Calendar" | "Staff";
+
+function CalculatorButton({ onOpen }: { onOpen: () => void }) {
+  return (
+    <button
+      aria-label="Calculator"
+      onClick={onOpen}
+      className="fixed bottom-20 right-4 z-10 rounded-full bg-green-600 text-white w-14 h-14 shadow-lg"
+    >
+      🧮
+    </button>
+  );
+}
 
 export default function App() {
   const { role, guestName, loading, setGuestName, signOut } = useAuth();
   const [guestMode, setGuestMode] = useState(false);
-  const [tab, setTab] = useState<"roster" | "staff">("roster");
+  const [tab, setTab] = useState<Tab>("Attendance");
+  const [calcOpen, setCalcOpen] = useState(false);
 
   if (loading) return null;
 
   // Signed-in staff
   if (role) {
+    const tabs: { key: Tab; node: React.ReactNode }[] = [
+      { key: "Attendance", node: <AttendanceTab /> },
+      { key: "Transparency", node: <TransparencyGrid /> },
+      { key: "Ledger", node: <Ledger /> },
+      { key: "Entry", node: <StaffEntry /> },
+      { key: "Calendar", node: <CalendarTab /> },
+    ];
+    if (isAdmin(role as Role)) {
+      tabs.push({ key: "Staff", node: <StaffAdmin /> });
+    }
+    const active = tabs.find((t) => t.key === tab) ?? tabs[0];
+
     return (
-      <div>
+      <div className="pb-16">
         <header className="flex items-center justify-between border-b p-3">
           <strong>Transparency Report</strong>
-          <button className="text-sm text-gray-500" onClick={signOut}>Sign out</button>
+          <button className="text-sm text-gray-500" onClick={signOut}>
+            Sign out
+          </button>
         </header>
-        {isAdmin(role) && (
-          <nav className="flex gap-2 border-b p-2 text-sm">
-            <button onClick={() => setTab("roster")}>Roster</button>
-            <button onClick={() => setTab("staff")}>Staff</button>
-          </nav>
-        )}
-        {tab === "staff" && isAdmin(role) ? <StaffAdmin /> : <RosterList />}
+        <main>{active.node}</main>
+        <nav className="fixed bottom-0 inset-x-0 border-t bg-white flex">
+          {tabs.map((t) => (
+            <button
+              key={t.key}
+              onClick={() => setTab(t.key)}
+              className={`flex-1 py-2 text-xs ${
+                active.key === t.key ? "text-green-600 font-semibold" : ""
+              }`}
+            >
+              {t.key}
+            </button>
+          ))}
+        </nav>
+        <CalculatorButton onOpen={() => setCalcOpen(true)} />
+        <Calculator open={calcOpen} onClose={() => setCalcOpen(false)} />
       </div>
     );
   }
@@ -36,8 +80,12 @@ export default function App() {
   if (guestName) {
     return (
       <div>
-        <header className="border-b p-3"><strong>Transparency Report</strong> — guest: {guestName}</header>
-        <RosterList />
+        <header className="border-b p-3">
+          <strong>Transparency Report</strong> — guest: {guestName}
+        </header>
+        <TransparencyGrid />
+        <CalculatorButton onOpen={() => setCalcOpen(true)} />
+        <Calculator open={calcOpen} onClose={() => setCalcOpen(false)} />
       </div>
     );
   }
@@ -48,7 +96,10 @@ export default function App() {
     <div>
       <AuthForm />
       <div className="mt-4 text-center">
-        <button className="text-sm text-green-700 underline" onClick={() => setGuestMode(true)}>
+        <button
+          className="text-sm text-green-700 underline"
+          onClick={() => setGuestMode(true)}
+        >
           Continue as guest (view only)
         </button>
       </div>
