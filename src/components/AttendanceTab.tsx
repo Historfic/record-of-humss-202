@@ -84,13 +84,19 @@ export function AttendanceTab() {
         />
       </div>
 
-      <ul className="flex flex-col divide-y">
+      <div className="m-3 overflow-hidden rounded-xl border border-slate-200 shadow-sm">
+      <div className="flex items-center gap-3 bg-slate-100 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+        <span className="h-4 w-4" />
+        <span className="flex-1">Name</span>
+        <span>Status</span>
+      </div>
+      <ul className="flex flex-col">
         {filtered.map((student) => {
           const status = statusFor(records, student.id);
           const meta = STATUS_META[status];
           const isOpen = openId === student.id;
           return (
-            <li key={student.id} className="flex flex-col">
+            <li key={student.id} className="flex flex-col border-t border-slate-100 odd:bg-white even:bg-slate-50">
               <button
                 type="button"
                 onClick={() => {
@@ -137,6 +143,7 @@ export function AttendanceTab() {
           );
         })}
       </ul>
+      </div>
     </div>
   );
 }

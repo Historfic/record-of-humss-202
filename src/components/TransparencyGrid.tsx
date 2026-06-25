@@ -56,8 +56,10 @@ export function TransparencyGrid() {
             <button
               key={g}
               onClick={() => setGranularity(g)}
-              className={`rounded px-3 py-2 text-sm capitalize ${
-                granularity === g ? "bg-blue-600 text-white" : "bg-gray-100"
+              className={`rounded-xl px-3 py-2 text-sm capitalize ${
+                granularity === g
+                  ? "bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white"
+                  : "bg-gray-100"
               }`}
             >
               {g}
@@ -72,15 +74,21 @@ export function TransparencyGrid() {
         </div>
       </div>
 
-      <div className="overflow-x-auto">
+      <div className="mb-3 flex flex-wrap gap-3 text-xs text-slate-500">
+        <span className="flex items-center gap-1"><span className="h-3 w-3 rounded bg-green-500" /> Paid</span>
+        <span className="flex items-center gap-1"><span className="h-3 w-3 rounded bg-orange-400" /> Partial</span>
+        <span className="flex items-center gap-1"><span className="h-3 w-3 rounded bg-red-500" /> Unpaid</span>
+      </div>
+
+      <div className="overflow-x-auto rounded-xl border border-slate-200 shadow-sm">
         <table className="border-collapse text-sm">
           <thead>
-            <tr>
-              <th className="sticky left-0 z-10 bg-white px-3 py-2 text-left">
+            <tr className="bg-slate-100 text-xs uppercase tracking-wide text-slate-500">
+              <th className="sticky left-0 z-10 border-b border-slate-200 bg-slate-100 px-3 py-2 text-left">
                 Student
               </th>
               {columns.map((col) => (
-                <th key={col.key} className="min-w-[5rem] px-3 py-2 text-center">
+                <th key={col.key} className="min-w-[5rem] border-b border-l border-slate-200 px-3 py-2 text-center">
                   {col.label}
                 </th>
               ))}
@@ -88,8 +96,8 @@ export function TransparencyGrid() {
           </thead>
           <tbody>
             {students.map((student) => (
-              <tr key={student.id}>
-                <td className="sticky left-0 z-10 bg-white px-3 py-2 font-medium">
+              <tr key={student.id} className="odd:bg-white even:bg-slate-50">
+                <td className="sticky left-0 z-10 border-b border-slate-100 bg-inherit px-3 py-2 font-medium">
                   {student.name}
                 </td>
                 {columns.map((col) => {

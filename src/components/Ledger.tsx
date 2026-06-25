@@ -3,7 +3,7 @@ import { listStudents } from "../lib/students";
 import type { Student } from "../lib/students";
 import { listPayments } from "../lib/funds";
 import type { Payment } from "../lib/funds";
-import { balanceCentavos, listExpenses, addExpense } from "../lib/expenses";
+import { balanceCentavos, listExpenses, addExpense, uploadReceipt } from "../lib/expenses";
 import type { Expense } from "../lib/expenses";
 import { formatPeso, pesosToCentavos } from "../lib/money";
 
@@ -13,6 +13,7 @@ interface Row {
   date: string;
   label: string;
   amount: number;
+  receiptUrl?: string | null;
 }
 
 function today(): string {
@@ -26,6 +27,9 @@ export function Ledger() {
   const [description, setDescription] = useState("");
   const [amount, setAmount] = useState("");
   const [date, setDate] = useState(today());
+  const [receiptFile, setReceiptFile] = useState<File | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     listStudents().then(setStudents);
@@ -54,21 +58,34 @@ export function Ledger() {
       date: e.date,
       label: e.description,
       amount: e.amount_centavos,
+      receiptUrl: e.receipt_url,
     })),
   ].sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0));
 
   async function onAddExpense(ev: React.FormEvent) {
     ev.preventDefault();
     if (!description.trim() || !amount) return;
-    await addExpense({
-      description: description.trim(),
-      amount_centavos: pesosToCentavos(Number(amount)),
-      date,
-    });
-    setDescription("");
-    setAmount("");
-    setDate(today());
-    setExpenses(await listExpenses());
+    setBusy(true);
+    setError(null);
+    try {
+      let receipt_url: string | null = null;
+      if (receiptFile) receipt_url = await uploadReceipt(receiptFile);
+      await addExpense({
+        description: description.trim(),
+        amount_centavos: pesosToCentavos(Number(amount)),
+        date,
+        receipt_url,
+      });
+      setDescription("");
+      setAmount("");
+      setDate(today());
+      setReceiptFile(null);
+      setExpenses(await listExpenses());
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Could not save the expense.");
+    } finally {
+      setBusy(false);
+    }
   }
 
   return (
@@ -106,26 +123,69 @@ export function Ledger() {
           value={date}
           onChange={(e) => setDate(e.target.value)}
         />
-        <button className="rounded bg-blue-600 px-4 py-2 text-white" type="submit">
-          Add expense
+        <label className="flex cursor-pointer items-center gap-1 rounded-xl border border-violet-200 bg-violet-50 px-3 py-2 text-sm text-violet-700">
+          📷 {receiptFile ? receiptFile.name.slice(0, 14) : "Receipt"}
+          <input
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={(e) => setReceiptFile(e.target.files?.[0] ?? null)}
+          />
+        </label>
+        <button
+          disabled={busy}
+          className="rounded-xl bg-gradient-to-r from-violet-600 to-fuchsia-600 px-4 py-2 font-medium text-white disabled:opacity-60"
+          type="submit"
+        >
+          {busy ? "Saving…" : "Add expense"}
         </button>
       </form>
+      {error && <p className="mb-3 text-sm text-red-600">{error}</p>}
 
-      <ul className="divide-y">
-        {rows.map((r) => (
-          <li key={r.key} className="flex items-center justify-between py-2">
-            <span className="flex items-center gap-2">
-              <span className={r.kind === "in" ? "text-green-600" : "text-red-600"}>
-                {r.kind === "in" ? "+" : "−"}
-              </span>
-              <span>{r.label}</span>
-            </span>
-            <span className={r.kind === "in" ? "text-green-600" : "text-red-600"}>
-              {formatPeso(r.amount)}
-            </span>
-          </li>
-        ))}
-      </ul>
+      <table className="w-full border-collapse overflow-hidden rounded-xl text-sm shadow-sm">
+        <thead>
+          <tr className="bg-slate-100 text-left text-xs uppercase tracking-wide text-slate-500">
+            <th className="px-3 py-2">Date</th>
+            <th className="px-3 py-2">Detail</th>
+            <th className="px-3 py-2 text-right">Amount</th>
+            <th className="px-3 py-2 text-center">Receipt</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((r) => (
+            <tr key={r.key} className="border-t border-slate-100 odd:bg-white even:bg-slate-50">
+              <td className="px-3 py-2 text-slate-500">{r.date.slice(0, 10)}</td>
+              <td className="px-3 py-2">
+                <span className={r.kind === "in" ? "text-green-600" : "text-red-600"}>
+                  {r.kind === "in" ? "+ " : "− "}
+                </span>
+                {r.label}
+              </td>
+              <td
+                className={
+                  "px-3 py-2 text-right font-medium " +
+                  (r.kind === "in" ? "text-green-600" : "text-red-600")
+                }
+              >
+                {formatPeso(r.amount)}
+              </td>
+              <td className="px-3 py-2 text-center">
+                {r.receiptUrl ? (
+                  <a href={r.receiptUrl} target="_blank" rel="noreferrer">
+                    <img
+                      src={r.receiptUrl}
+                      alt="receipt"
+                      className="mx-auto h-10 w-10 rounded object-cover"
+                    />
+                  </a>
+                ) : (
+                  <span className="text-slate-300">—</span>
+                )}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }
