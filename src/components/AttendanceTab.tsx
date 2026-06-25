@@ -29,6 +29,7 @@ export function AttendanceTab() {
   const [search, setSearch] = useState("");
   const [openId, setOpenId] = useState<string | null>(null);
   const [note, setNote] = useState("");
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -58,11 +59,16 @@ export function AttendanceTab() {
 
   async function choose(studentId: string, status: AttStatus) {
     const noteVal = status === "excused" ? note.trim() || null : null;
-    await setAttendance(studentId, date, status, noteVal);
-    const fresh = await listAttendance(date);
-    setRecords(fresh);
-    setOpenId(null);
-    setNote("");
+    setError(null);
+    try {
+      await setAttendance(studentId, date, status, noteVal);
+      const fresh = await listAttendance(date);
+      setRecords(fresh);
+      setOpenId(null);
+      setNote("");
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Could not save. Are you signed in as staff?");
+    }
   }
 
   return (
@@ -137,6 +143,7 @@ export function AttendanceTab() {
                     onChange={(e) => setNote(e.target.value)}
                     className="rounded border p-2 text-base"
                   />
+                  {error && <p className="text-sm text-red-600">{error}</p>}
                 </div>
               )}
             </li>

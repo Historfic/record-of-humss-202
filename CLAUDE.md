@@ -1,49 +1,29 @@
-# CLAUDE.md — guidance for Claude Code working in this repo
+# CLAUDE.md — System Rules & Architecture
 
-This file is read automatically at the start of each session. Keep it short and current so
-work starts fast (and cheap) without re-deriving the basics.
+## Core Philosophy
+- **Offline-First:** All UI reads are local (or cached); all writes go to the `db.write()` outbox first.
+- **Money Safety:** Use `money.ts` for ALL arithmetic. NEVER use floats. Use integer centavos.
+- **State Management:** Keep React state local and temporary. Persistence is the database's responsibility.
 
-## What this is
-"Records of HUMSS-202" — a mobile-first PWA for a class's fund transparency + attendance.
-Source of truth is a Supabase (Postgres) backend; the app works offline and syncs when online.
+## Component Architecture
+- **Pages/Views:** Located in `src/pages/`.
+- **Atomic Components:** Small, stateless UI elements (buttons, inputs, cards) in `src/components/`.
+- **Data Hooks:** `src/hooks/` — all `useQuery` or `useMutation` calls for Supabase must live here, not in components.
 
-## Tech stack
-- Vite + React 18 + TypeScript, Tailwind CSS, `vite-plugin-pwa`.
-- Backend: Supabase (Postgres + Auth + Row Level Security).
-- Serverless admin actions: Vercel functions in `api/` (use the service-role key).
-- Tests: Vitest + @testing-library/react.
+## Strict Rules
+1. **No Floats for Money:** Any variable representing currency MUST be type `number` (representing centavos) and strictly manipulated via `money.ts` functions.
+2. **Access Control:** Do not trust the UI to hide admin features. Ensure Row Level Security (RLS) is applied to all tables.
+3. **Async/Await:** All database calls must be wrapped in error handling. Show user-friendly toast messages on failure.
+4. **Imports:** Use absolute paths (e.g., `@/components/Button`) where configured.
+5. **No Inline Logic:** If a component has > 5 lines of conditional logic, move it to a helper function in a dedicated `utils.ts` or `logic.ts` file.
 
-## Commands
-- `npm run dev` — local dev (note: `api/` functions do NOT run here, only on Vercel).
-- `npm run build` — typecheck + production build (must stay green).
-- `npm run test` — run the full Vitest suite (must stay green).
+## Offline/Sync Workflow
+1. User action -> Call `outbox.push()`.
+2. UI performs "Optimistic Update" -> User sees change instantly.
+3. `net.ts` watches outbox -> Pushes to Supabase when online.
+4. If sync fails -> Trigger local retry + notify user in the UI.
 
-## Architecture / where things live
-- `src/lib/` — data layer & pure logic (one responsibility per file): `supabase.ts`,
-  `students.ts`, `funds.ts`, `attendance.ts`, `expenses.ts`, `calendar.ts`, `money.ts`,
-  `grid.ts`, `roles.ts`, plus the offline engine `net.ts`, `outbox.ts`, `db.ts`, and
-  `admin.ts` (calls the serverless API).
-- `src/components/` — UI. Key shells: `App.tsx` (side nav + routing), `TransparencyTab.tsx`,
-  `AdminPanel.tsx`. Tab components: `AttendanceTab`, `TransparencyGrid`, `Ledger`,
-  `StaffEntry`, `CalendarTab`, `StaffRoster`, `Calculator`, `OfflineBanner`.
-- `src/context/AuthContext.tsx` — session + role.
-- `supabase/migrations/` — numbered SQL migrations (run in order in the Supabase SQL editor).
-- `api/` — Vercel serverless functions (admin create-staff / reset-password).
-
-## Conventions (follow these)
-- **TDD**: write a failing test first, implement minimally, keep the suite green.
-- **Money is stored as integer centavos** (₱2.00 = 200) — never floats. Use `money.ts`.
-- **All writes go through `db.write()`** (offline outbox), except admin/staff role ops.
-  Reads call `supabase` directly (the service worker caches them for offline).
-- Keep files small and single-purpose. Don't change existing `data-testid`, input
-  `placeholder`, `aria-label`, or button accessible names that tests rely on.
-- `isolatedModules` is on → use `import type` for type-only imports.
-- Commit in small, working steps. Don't commit secrets; `.env.local` is git-ignored.
-
-## Roles
-admin (full control + Admin tab) · treasurer/auditor (enter/remove data) · guest (view-only).
-RLS enforces this in the database, not just the UI.
-
-## Gotchas
-- Confirmation emails are bypassed by migration `0004` (auto-confirm trigger).
-- The service-role key lives ONLY in Vercel env vars — never import it client-side.
+## File Naming
+- Components: `PascalCase.tsx`.
+- Hooks/Utils: `camelCase.ts`.
+- Tests: `name.test.ts`.
