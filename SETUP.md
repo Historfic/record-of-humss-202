@@ -13,6 +13,7 @@ Everything you need to do **manually** (the things I can't do for you). Work top
    - `supabase/migrations/0002_features.sql`
    - `supabase/migrations/0003_sync_columns.sql`
    - `supabase/migrations/0004_auto_confirm.sql`  ← makes sign-ups work instantly, no email
+   - `supabase/migrations/0005_receipts.sql`  ← adds receipt photos + creates the storage bucket
    Verify in **Table Editor**: you should see `users, students, collections, payments,
    attendance, expenses, calendar_notes, guest_log`.
 3. **Email confirmation:** you do NOT need to touch any dashboard toggle — migration `0004`
