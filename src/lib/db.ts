@@ -23,14 +23,23 @@ export function applyOp(
 }
 
 export async function write(op: OpInput): Promise<void> {
+  // Offline: stash the change to sync later.
   if (!isOnline()) {
     enqueue(op);
     return;
   }
-  const { error } = await applyOp(supabase, op as Op);
-  if (error) {
+  let result: { error: unknown };
+  try {
+    result = await applyOp(supabase, op as Op);
+  } catch {
+    // Couldn't reach the server at all (connection dropped) -> queue for retry.
     enqueue(op);
     return;
+  }
+  // The server responded with a real error (e.g. permission/validation).
+  // Surface it instead of silently queueing, so the UI can show what went wrong.
+  if (result.error) {
+    throw result.error;
   }
 }
 
