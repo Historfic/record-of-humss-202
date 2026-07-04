@@ -30,6 +30,8 @@ export function Ledger() {
   const [receiptFile, setReceiptFile] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [mobileTab, setMobileTab] = useState<"in" | "out">("in");
+  const [preview, setPreview] = useState<string | null>(null);
 
   useEffect(() => {
     listStudents().then(setStudents);
@@ -147,9 +149,29 @@ export function Ledger() {
       </form>
       {error && <p className="mb-3 text-sm text-red-600">{error}</p>}
 
+      {/* Mobile-only In/Out switch so you don't scroll past a long list */}
+      <div className="mb-3 flex gap-2 md:hidden">
+        <button
+          onClick={() => setMobileTab("in")}
+          className={`flex-1 rounded-full px-3 py-1.5 text-sm font-medium ${
+            mobileTab === "in" ? "bg-green-600 text-white" : "bg-slate-100 text-slate-600"
+          }`}
+        >
+          Money in
+        </button>
+        <button
+          onClick={() => setMobileTab("out")}
+          className={`flex-1 rounded-full px-3 py-1.5 text-sm font-medium ${
+            mobileTab === "out" ? "bg-red-600 text-white" : "bg-slate-100 text-slate-600"
+          }`}
+        >
+          Money out
+        </button>
+      </div>
+
       <div className="grid gap-4 md:grid-cols-2">
         {/* Money IN */}
-        <div className="overflow-hidden rounded-xl border border-slate-200 shadow-sm">
+        <div className={`overflow-hidden rounded-xl border border-slate-200 shadow-sm md:block ${mobileTab === "in" ? "block" : "hidden"}`}>
           <div className="bg-green-50 px-3 py-2 text-sm font-semibold text-green-700">
             💰 Money in — {formatPeso(totalIn)}
           </div>
@@ -168,7 +190,7 @@ export function Ledger() {
         </div>
 
         {/* Money OUT */}
-        <div className="overflow-hidden rounded-xl border border-slate-200 shadow-sm">
+        <div className={`overflow-hidden rounded-xl border border-slate-200 shadow-sm md:block ${mobileTab === "out" ? "block" : "hidden"}`}>
           <div className="bg-red-50 px-3 py-2 text-sm font-semibold text-red-700">
             🧾 Money out — {formatPeso(totalOut)}
           </div>
@@ -182,9 +204,9 @@ export function Ledger() {
                 </span>
                 <span className="flex shrink-0 items-center gap-2">
                   {r.receiptUrl && (
-                    <a href={r.receiptUrl} target="_blank" rel="noreferrer">
+                    <button onClick={() => setPreview(r.receiptUrl ?? null)} title="View receipt">
                       <img src={r.receiptUrl} alt="receipt" className="h-8 w-8 rounded object-cover" />
-                    </a>
+                    </button>
                   )}
                   <span className="font-medium text-red-600">−{formatPeso(r.amount)}</span>
                 </span>
@@ -193,6 +215,27 @@ export function Ledger() {
           </ul>
         </div>
       </div>
+
+      {preview && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
+          onClick={() => setPreview(null)}
+        >
+          <img
+            src={preview}
+            alt="receipt"
+            className="max-h-[85vh] max-w-full rounded-lg shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          />
+          <button
+            aria-label="Close preview"
+            onClick={() => setPreview(null)}
+            className="fixed right-4 top-4 rounded-full bg-white/90 px-3 py-1 text-lg font-bold text-slate-700"
+          >
+            ✕
+          </button>
+        </div>
+      )}
     </div>
   );
 }
