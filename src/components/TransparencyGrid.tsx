@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { listStudents } from "../lib/students";
 import type { Student } from "../lib/students";
-import { listCollections, listPayments, totalCentavos } from "../lib/funds";
+import { listCollections, listPayments, recordPayment, totalCentavos } from "../lib/funds";
 import type { Collection, Payment } from "../lib/funds";
 import { buildColumns, cellPaid } from "../lib/grid";
 import type { Column, Granularity } from "../lib/grid";
-import { formatPeso, paymentStatus } from "../lib/money";
+import { formatPeso, paymentStatus, pesosToCentavos } from "../lib/money";
 import type { PayStatus } from "../lib/money";
 
 const STATUS_BG: Record<PayStatus, string> = {
@@ -21,12 +21,14 @@ interface Selection {
   paid: number;
 }
 
-export function TransparencyGrid() {
+export function TransparencyGrid({ canEdit = false }: { canEdit?: boolean }) {
   const [students, setStudents] = useState<Student[]>([]);
   const [collections, setCollections] = useState<Collection[]>([]);
   const [payments, setPayments] = useState<Payment[]>([]);
   const [granularity, setGranularity] = useState<Granularity>("day");
   const [selection, setSelection] = useState<Selection | null>(null);
+  const [payAmount, setPayAmount] = useState("");
+  const [payError, setPayError] = useState<string | null>(null);
 
   useEffect(() => {
     void (async () => {
@@ -40,6 +42,34 @@ export function TransparencyGrid() {
       setPayments(p);
     })();
   }, []);
+
+  // Inline payment entry is only unambiguous on a Day cell (one due per cell).
+  const canPayHere =
+    canEdit &&
+    granularity === "day" &&
+    selection !== null &&
+    selection.col.collectionIds.length === 1;
+
+  async function savePayment() {
+    if (!selection || selection.col.collectionIds.length !== 1) return;
+    setPayError(null);
+    try {
+      await recordPayment({
+        student_id: selection.student.id,
+        collection_id: selection.col.collectionIds[0],
+        amount_centavos: pesosToCentavos(Number(payAmount)),
+      });
+      const fresh = await listPayments();
+      setPayments(fresh);
+      setSelection({
+        ...selection,
+        paid: cellPaid(fresh, selection.student.id, selection.col),
+      });
+      setPayAmount("");
+    } catch (e) {
+      setPayError(e instanceof Error ? e.message : "Could not save the payment.");
+    }
+  }
 
   const columns = useMemo(
     () => buildColumns(collections, granularity),
@@ -128,9 +158,38 @@ export function TransparencyGrid() {
           <div className="mt-2">
             {formatPeso(selection.paid)} of {formatPeso(selection.col.dueCentavos)}
           </div>
+
+          {canPayHere ? (
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              <input
+                data-testid="pay-input"
+                type="number"
+                step="0.01"
+                placeholder="₱ amount"
+                value={payAmount}
+                onChange={(e) => setPayAmount(e.target.value)}
+                className="w-28 rounded-lg border p-2"
+              />
+              <button
+                onClick={savePayment}
+                className="rounded-lg bg-gradient-to-r from-violet-600 to-fuchsia-600 px-3 py-2 text-sm font-medium text-white"
+              >
+                Save payment
+              </button>
+            </div>
+          ) : (
+            canEdit &&
+            granularity !== "day" && (
+              <p className="mt-2 text-xs text-slate-500">
+                Switch to <b>Day</b> view to record a payment here.
+              </p>
+            )
+          )}
+          {payError && <p className="mt-2 text-sm text-red-600">{payError}</p>}
+
           <button
-            onClick={() => setSelection(null)}
-            className="mt-2 rounded bg-gray-100 px-3 py-1 text-sm"
+            onClick={() => { setSelection(null); setPayAmount(""); setPayError(null); }}
+            className="mt-3 rounded bg-gray-100 px-3 py-1 text-sm"
           >
             Close
           </button>

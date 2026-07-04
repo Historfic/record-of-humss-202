@@ -44,23 +44,28 @@ export function Ledger() {
   const totalOut = expenses.reduce((s, e) => s + e.amount_centavos, 0);
   const balance = balanceCentavos(payments, expenses);
 
-  const rows: Row[] = [
-    ...payments.map((p) => ({
+  const byDateDesc = (a: Row, b: Row) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0);
+
+  const moneyIn: Row[] = payments
+    .map((p) => ({
       key: "p" + p.id,
       kind: "in" as const,
       date: p.paid_at,
       label: studentName(p.student_id),
       amount: p.amount_centavos,
-    })),
-    ...expenses.map((e) => ({
+    }))
+    .sort(byDateDesc);
+
+  const moneyOut: Row[] = expenses
+    .map((e) => ({
       key: "e" + e.id,
       kind: "out" as const,
       date: e.date,
       label: e.description,
       amount: e.amount_centavos,
       receiptUrl: e.receipt_url,
-    })),
-  ].sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0));
+    }))
+    .sort(byDateDesc);
 
   async function onAddExpense(ev: React.FormEvent) {
     ev.preventDefault();
@@ -142,50 +147,52 @@ export function Ledger() {
       </form>
       {error && <p className="mb-3 text-sm text-red-600">{error}</p>}
 
-      <table className="w-full border-collapse overflow-hidden rounded-xl text-sm shadow-sm">
-        <thead>
-          <tr className="bg-slate-100 text-left text-xs uppercase tracking-wide text-slate-500">
-            <th className="px-3 py-2">Date</th>
-            <th className="px-3 py-2">Detail</th>
-            <th className="px-3 py-2 text-right">Amount</th>
-            <th className="px-3 py-2 text-center">Receipt</th>
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((r) => (
-            <tr key={r.key} className="border-t border-slate-100 odd:bg-white even:bg-slate-50">
-              <td className="px-3 py-2 text-slate-500">{r.date.slice(0, 10)}</td>
-              <td className="px-3 py-2">
-                <span className={r.kind === "in" ? "text-green-600" : "text-red-600"}>
-                  {r.kind === "in" ? "+ " : "− "}
+      <div className="grid gap-4 md:grid-cols-2">
+        {/* Money IN */}
+        <div className="overflow-hidden rounded-xl border border-slate-200 shadow-sm">
+          <div className="bg-green-50 px-3 py-2 text-sm font-semibold text-green-700">
+            💰 Money in — {formatPeso(totalIn)}
+          </div>
+          <ul className="divide-y divide-slate-100">
+            {moneyIn.length === 0 && <li className="px-3 py-3 text-sm text-slate-400">No payments yet.</li>}
+            {moneyIn.map((r) => (
+              <li key={r.key} className="flex items-center justify-between px-3 py-2 text-sm">
+                <span>
+                  <span className="text-slate-400">{r.date.slice(0, 10)} · </span>
+                  {r.label}
                 </span>
-                {r.label}
-              </td>
-              <td
-                className={
-                  "px-3 py-2 text-right font-medium " +
-                  (r.kind === "in" ? "text-green-600" : "text-red-600")
-                }
-              >
-                {formatPeso(r.amount)}
-              </td>
-              <td className="px-3 py-2 text-center">
-                {r.receiptUrl ? (
-                  <a href={r.receiptUrl} target="_blank" rel="noreferrer">
-                    <img
-                      src={r.receiptUrl}
-                      alt="receipt"
-                      className="mx-auto h-10 w-10 rounded object-cover"
-                    />
-                  </a>
-                ) : (
-                  <span className="text-slate-300">—</span>
-                )}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+                <span className="font-medium text-green-600">+{formatPeso(r.amount)}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        {/* Money OUT */}
+        <div className="overflow-hidden rounded-xl border border-slate-200 shadow-sm">
+          <div className="bg-red-50 px-3 py-2 text-sm font-semibold text-red-700">
+            🧾 Money out — {formatPeso(totalOut)}
+          </div>
+          <ul className="divide-y divide-slate-100">
+            {moneyOut.length === 0 && <li className="px-3 py-3 text-sm text-slate-400">No expenses yet.</li>}
+            {moneyOut.map((r) => (
+              <li key={r.key} className="flex items-center justify-between gap-2 px-3 py-2 text-sm">
+                <span className="min-w-0">
+                  <span className="text-slate-400">{r.date.slice(0, 10)} · </span>
+                  {r.label}
+                </span>
+                <span className="flex shrink-0 items-center gap-2">
+                  {r.receiptUrl && (
+                    <a href={r.receiptUrl} target="_blank" rel="noreferrer">
+                      <img src={r.receiptUrl} alt="receipt" className="h-8 w-8 rounded object-cover" />
+                    </a>
+                  )}
+                  <span className="font-medium text-red-600">−{formatPeso(r.amount)}</span>
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
     </div>
   );
 }

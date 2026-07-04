@@ -40,7 +40,7 @@ export function TransparencyTab({ mode }: TransparencyTabProps) {
         })}
       </div>
       <div>
-        {sub === "Grid" && <TransparencyGrid />}
+        {sub === "Grid" && <TransparencyGrid canEdit />}
         {sub === "History" && <Ledger />}
         {sub === "Record" && <StaffEntry />}
       </div>

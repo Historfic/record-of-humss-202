@@ -16,6 +16,30 @@ export function statusFor(records: AttendanceRecord[], studentId: string): AttSt
   return rec ? rec.status : "present";
 }
 
+// Status of a student on a specific date (defaults to present when no record).
+export function statusForDate(
+  records: AttendanceRecord[],
+  studentId: string,
+  date: string
+): AttStatus {
+  const rec = records.find((r) => r.student_id === studentId && r.date === date);
+  return rec ? rec.status : "present";
+}
+
+// All attendance records within an inclusive date range (for the month grid).
+export async function listAttendanceBetween(
+  start: string,
+  end: string
+): Promise<AttendanceRecord[]> {
+  const { data, error } = await supabase
+    .from("attendance")
+    .select("id,student_id,date,status,note")
+    .gte("date", start)
+    .lte("date", end);
+  if (error) throw error;
+  return (data ?? []) as AttendanceRecord[];
+}
+
 export async function listAttendance(date: string): Promise<AttendanceRecord[]> {
   const { data, error } = await supabase
     .from("attendance")
