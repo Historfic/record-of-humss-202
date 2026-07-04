@@ -7,6 +7,15 @@ vi.mock("../lib/guest", () => ({ listGuestVisits }));
 vi.mock("../lib/admin", () => ({ createStaff }));
 vi.mock("./StaffRoster", () => ({ StaffRoster: () => <div>StaffRoster</div> }));
 vi.mock("./Ledger", () => ({ Ledger: () => <div>Ledger</div> }));
+vi.mock("../context/ThemeContext", () => ({
+  useTheme: () => ({
+    personalDark: false,
+    globalDark: false,
+    effective: false,
+    togglePersonal: vi.fn(),
+    setGlobal: vi.fn(),
+  }),
+}));
 import { AdminPanel } from "./AdminPanel";
 
 beforeEach(() => {

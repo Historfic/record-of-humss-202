@@ -97,8 +97,8 @@ export function Ledger() {
 
   return (
     <div className="p-4">
-      <div className="mb-4 rounded border p-4">
-        <div className="text-sm text-gray-500">Balance</div>
+      <div className="mb-4 rounded border p-4 dark:border-slate-700 dark:bg-slate-800">
+        <div className="text-sm text-gray-500 dark:text-slate-400">Balance</div>
         <div data-testid="balance" className="text-2xl font-bold">
           {formatPeso(balance)}
         </div>
@@ -110,14 +110,14 @@ export function Ledger() {
 
       <form onSubmit={onAddExpense} className="mb-4 flex flex-wrap gap-2">
         <input
-          className="flex-1 rounded border p-2"
+          className="flex-1 rounded border p-2 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 dark:placeholder-slate-400"
           placeholder="What did you buy?"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
         />
         <input
           data-testid="expense-amount"
-          className="w-24 rounded border p-2"
+          className="w-24 rounded border p-2 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 dark:placeholder-slate-400"
           type="number"
           step="0.01"
           placeholder="₱"
@@ -125,7 +125,7 @@ export function Ledger() {
           onChange={(e) => setAmount(e.target.value)}
         />
         <input
-          className="rounded border p-2"
+          className="rounded border p-2 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100"
           type="date"
           value={date}
           onChange={(e) => setDate(e.target.value)}
@@ -154,7 +154,7 @@ export function Ledger() {
         <button
           onClick={() => setMobileTab("in")}
           className={`flex-1 rounded-full px-3 py-1.5 text-sm font-medium ${
-            mobileTab === "in" ? "bg-green-600 text-white" : "bg-slate-100 text-slate-600"
+            mobileTab === "in" ? "bg-green-600 text-white" : "bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300"
           }`}
         >
           Money in
@@ -162,7 +162,7 @@ export function Ledger() {
         <button
           onClick={() => setMobileTab("out")}
           className={`flex-1 rounded-full px-3 py-1.5 text-sm font-medium ${
-            mobileTab === "out" ? "bg-red-600 text-white" : "bg-slate-100 text-slate-600"
+            mobileTab === "out" ? "bg-red-600 text-white" : "bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300"
           }`}
         >
           Money out
@@ -171,11 +171,11 @@ export function Ledger() {
 
       <div className="grid gap-4 md:grid-cols-2">
         {/* Money IN */}
-        <div className={`overflow-hidden rounded-xl border border-slate-200 shadow-sm md:block ${mobileTab === "in" ? "block" : "hidden"}`}>
-          <div className="bg-green-50 px-3 py-2 text-sm font-semibold text-green-700">
+        <div className={`overflow-hidden rounded-xl border border-slate-200 shadow-sm md:block dark:border-slate-700 dark:bg-slate-800 ${mobileTab === "in" ? "block" : "hidden"}`}>
+          <div className="bg-green-50 px-3 py-2 text-sm font-semibold text-green-700 dark:bg-green-900/30 dark:text-green-300">
             💰 Money in — {formatPeso(totalIn)}
           </div>
-          <ul className="divide-y divide-slate-100">
+          <ul className="divide-y divide-slate-100 dark:divide-slate-700">
             {moneyIn.length === 0 && <li className="px-3 py-3 text-sm text-slate-400">No payments yet.</li>}
             {moneyIn.map((r) => (
               <li key={r.key} className="flex items-center justify-between px-3 py-2 text-sm">
@@ -190,11 +190,11 @@ export function Ledger() {
         </div>
 
         {/* Money OUT */}
-        <div className={`overflow-hidden rounded-xl border border-slate-200 shadow-sm md:block ${mobileTab === "out" ? "block" : "hidden"}`}>
-          <div className="bg-red-50 px-3 py-2 text-sm font-semibold text-red-700">
+        <div className={`overflow-hidden rounded-xl border border-slate-200 shadow-sm md:block dark:border-slate-700 dark:bg-slate-800 ${mobileTab === "out" ? "block" : "hidden"}`}>
+          <div className="bg-red-50 px-3 py-2 text-sm font-semibold text-red-700 dark:bg-red-900/30 dark:text-red-300">
             🧾 Money out — {formatPeso(totalOut)}
           </div>
-          <ul className="divide-y divide-slate-100">
+          <ul className="divide-y divide-slate-100 dark:divide-slate-700">
             {moneyOut.length === 0 && <li className="px-3 py-3 text-sm text-slate-400">No expenses yet.</li>}
             {moneyOut.map((r) => (
               <li key={r.key} className="flex items-center justify-between gap-2 px-3 py-2 text-sm">

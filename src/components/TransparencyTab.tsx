@@ -31,7 +31,7 @@ export function TransparencyTab({ mode }: TransparencyTabProps) {
               className={`rounded-full px-4 py-1.5 text-sm font-medium transition ${
                 active
                   ? "bg-gradient-to-r from-violet-600 to-fuchsia-500 text-white shadow-md"
-                  : "bg-white text-slate-600 shadow-sm hover:bg-violet-50"
+                  : "bg-white text-slate-600 shadow-sm hover:bg-violet-50 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
               }`}
             >
               {t}

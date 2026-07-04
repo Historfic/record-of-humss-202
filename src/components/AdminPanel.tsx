@@ -4,8 +4,31 @@ import { Ledger } from "./Ledger";
 import { createStaff } from "../lib/admin";
 import { listGuestVisits } from "../lib/guest";
 import type { GuestVisit } from "../lib/guest";
+import { useTheme } from "../context/ThemeContext";
 
-type SubTab = "Staff" | "Add staff" | "Who viewed" | "History";
+type SubTab = "Staff" | "Add staff" | "Who viewed" | "History" | "Appearance";
+
+function Appearance() {
+  const { globalDark, setGlobal } = useTheme();
+
+  return (
+    <div className="p-4">
+      <h2 className="mb-3 text-lg font-bold text-violet-700 dark:text-violet-300">Appearance</h2>
+      <label className="flex items-center gap-3">
+        <input
+          type="checkbox"
+          checked={globalDark}
+          onChange={(e) => void setGlobal(e.target.checked)}
+          className="h-5 w-5"
+        />
+        <span className="text-sm font-medium">Force dark mode for everyone</span>
+      </label>
+      <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
+        When on, every user sees dark mode. When off, each person uses their own toggle.
+      </p>
+    </div>
+  );
+}
 
 function AddStaffForm() {
   const [email, setEmail] = useState("");
@@ -38,7 +61,7 @@ function AddStaffForm() {
         <input
           aria-label="Email"
           type="email"
-          className="mt-1 w-full rounded-xl border border-violet-100 p-2"
+          className="mt-1 w-full rounded-xl border border-violet-100 p-2 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
@@ -48,7 +71,7 @@ function AddStaffForm() {
         <input
           aria-label="Password"
           type="text"
-          className="mt-1 w-full rounded-xl border border-violet-100 p-2"
+          className="mt-1 w-full rounded-xl border border-violet-100 p-2 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
@@ -57,7 +80,7 @@ function AddStaffForm() {
         Role
         <select
           aria-label="Role"
-          className="mt-1 w-full rounded-xl border border-violet-100 p-2"
+          className="mt-1 w-full rounded-xl border border-violet-100 p-2 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100"
           value={role}
           onChange={(e) => setRole(e.target.value as typeof role)}
         >
@@ -70,7 +93,7 @@ function AddStaffForm() {
         Title
         <input
           aria-label="Title"
-          className="mt-1 w-full rounded-xl border border-violet-100 p-2"
+          className="mt-1 w-full rounded-xl border border-violet-100 p-2 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
         />
@@ -104,10 +127,10 @@ function WhoViewed() {
         {visits.map((v) => (
           <li
             key={v.id}
-            className="flex items-center justify-between rounded-2xl border border-violet-100 bg-white p-3 shadow-sm"
+            className="flex items-center justify-between rounded-2xl border border-violet-100 bg-white p-3 shadow-sm dark:border-slate-700 dark:bg-slate-800"
           >
             <span className="font-medium">{v.name}</span>
-            <span className="text-sm text-slate-500">
+            <span className="text-sm text-slate-500 dark:text-slate-400">
               {new Date(v.visited_at).toLocaleString()}
             </span>
           </li>
@@ -119,7 +142,7 @@ function WhoViewed() {
 
 export function AdminPanel() {
   const [sub, setSub] = useState<SubTab>("Staff");
-  const tabs: SubTab[] = ["Staff", "Add staff", "Who viewed", "History"];
+  const tabs: SubTab[] = ["Staff", "Add staff", "Who viewed", "History", "Appearance"];
 
   return (
     <div>
@@ -133,7 +156,7 @@ export function AdminPanel() {
               className={`rounded-full px-4 py-1.5 text-sm font-medium transition ${
                 active
                   ? "bg-gradient-to-r from-violet-600 to-fuchsia-500 text-white shadow-md"
-                  : "bg-white text-slate-600 shadow-sm hover:bg-violet-50"
+                  : "bg-white text-slate-600 shadow-sm hover:bg-violet-50 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
               }`}
             >
               {t}
@@ -146,6 +169,7 @@ export function AdminPanel() {
         {sub === "Add staff" && <AddStaffForm />}
         {sub === "Who viewed" && <WhoViewed />}
         {sub === "History" && <Ledger />}
+        {sub === "Appearance" && <Appearance />}
       </div>
     </div>
   );

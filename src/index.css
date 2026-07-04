@@ -9,3 +9,8 @@ body {
   min-height: 100vh;
   color: #1e293b;
 }
+
+.dark body {
+  background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+  color: #e2e8f0;
+}

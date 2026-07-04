@@ -92,11 +92,11 @@ export function AttendanceTab({
 
   return (
     <div className="flex flex-col">
-      <div className="sticky top-0 z-20 flex flex-col gap-2 bg-white/90 p-3 shadow backdrop-blur">
+      <div className="sticky top-0 z-20 flex flex-col gap-2 bg-white/90 p-3 shadow backdrop-blur dark:bg-slate-900/90">
         <div className="flex items-center justify-between gap-2">
-          <button onClick={() => move(-1)} className="rounded-lg bg-slate-100 px-3 py-1 text-lg">‹</button>
+          <button onClick={() => move(-1)} className="rounded-lg bg-slate-100 px-3 py-1 text-lg dark:bg-slate-700 dark:text-slate-200">‹</button>
           <span data-testid="att-month" className="font-semibold">{monthLabel(year, monthIndex)}</span>
-          <button onClick={() => move(1)} className="rounded-lg bg-slate-100 px-3 py-1 text-lg">›</button>
+          <button onClick={() => move(1)} className="rounded-lg bg-slate-100 px-3 py-1 text-lg dark:bg-slate-700 dark:text-slate-200">›</button>
         </div>
         <div className="flex items-center gap-2">
           <input
@@ -107,11 +107,11 @@ export function AttendanceTab({
               const [y, m] = e.target.value.split("-").map(Number);
               if (y && m) { setYear(y); setMonthIndex(m - 1); setSel(null); }
             }}
-            className="flex-1 rounded-lg border p-1.5 text-sm"
+            className="flex-1 rounded-lg border p-1.5 text-sm dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100"
           />
           <button
             onClick={() => { setYear(now.getFullYear()); setMonthIndex(now.getMonth()); setSel(null); }}
-            className="rounded-lg bg-violet-100 px-3 py-1.5 text-sm font-medium text-violet-700"
+            className="rounded-lg bg-violet-100 px-3 py-1.5 text-sm font-medium text-violet-700 dark:bg-slate-700 dark:text-violet-300"
           >
             Today
           </button>
@@ -121,9 +121,9 @@ export function AttendanceTab({
           placeholder="Search name…"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="rounded-xl border p-2 text-base"
+          className="rounded-xl border p-2 text-base dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 dark:placeholder-slate-400"
         />
-        <div className="flex flex-wrap gap-3 text-xs text-slate-500">
+        <div className="flex flex-wrap gap-3 text-xs text-slate-500 dark:text-slate-400">
           <span className="flex items-center gap-1"><span className="h-3 w-3 rounded bg-green-500" /> Present</span>
           <span className="flex items-center gap-1"><span className="h-3 w-3 rounded bg-red-500" /> Absent</span>
           <span className="flex items-center gap-1"><span className="h-3 w-3 rounded bg-orange-400" /> Excused</span>
@@ -131,13 +131,13 @@ export function AttendanceTab({
         </div>
       </div>
 
-      <div className="m-3 overflow-x-auto rounded-xl border border-slate-200 shadow-sm">
+      <div className="m-3 overflow-x-auto rounded-xl border border-slate-200 shadow-sm dark:border-slate-700">
         <table className="border-collapse text-xs">
           <thead>
-            <tr className="bg-slate-100 text-slate-500">
-              <th className="sticky left-0 z-10 border-b border-slate-200 bg-slate-100 px-3 py-2 text-left">Name</th>
+            <tr className="bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400">
+              <th className="sticky left-0 z-10 border-b border-slate-200 bg-slate-100 px-3 py-2 text-left dark:border-slate-700 dark:bg-slate-800">Name</th>
               {days.map((d) => (
-                <th key={d} className="border-b border-l border-slate-200 px-1 py-2 text-center font-medium">
+                <th key={d} className="border-b border-l border-slate-200 px-1 py-2 text-center font-medium dark:border-slate-700">
                   {Number(d.slice(8))}
                 </th>
               ))}
@@ -145,8 +145,8 @@ export function AttendanceTab({
           </thead>
           <tbody>
             {filtered.map((student) => (
-              <tr key={student.id} className="odd:bg-white even:bg-slate-50">
-                <td className="sticky left-0 z-10 whitespace-nowrap border-b border-slate-100 bg-inherit px-3 py-1 font-medium">
+              <tr key={student.id} className="odd:bg-white even:bg-slate-50 dark:odd:bg-slate-800 dark:even:bg-slate-800/60 dark:text-slate-100">
+                <td className="sticky left-0 z-10 whitespace-nowrap border-b border-slate-100 bg-inherit px-3 py-1 font-medium dark:border-slate-700">
                   {student.name}
                 </td>
                 {days.map((d) => {
@@ -156,12 +156,12 @@ export function AttendanceTab({
                   const status: AttStatus | null = rec ? rec.status : isFuture ? null : "present";
                   const meta = status ? STATUS_META[status] : null;
                   return (
-                    <td key={d} className="border-b border-l border-slate-100 p-0.5">
+                    <td key={d} className="border-b border-l border-slate-100 p-0.5 dark:border-slate-700">
                       <button
                         data-testid={`att-cell-${student.id}-${d}`}
                         onClick={() => { setSel({ studentId: student.id, date: d }); setNote(""); setError(null); }}
                         className={`h-8 w-8 rounded text-[11px] font-bold ${
-                          meta ? `text-white ${meta.bg}` : "bg-slate-100 text-slate-300"
+                          meta ? `text-white ${meta.bg}` : "bg-slate-100 text-slate-300 dark:bg-slate-700 dark:text-slate-500"
                         }`}
                         title={`${student.name} — ${d}${meta ? " — " + meta.label : ""}`}
                       >
@@ -177,7 +177,7 @@ export function AttendanceTab({
       </div>
 
       {sel && selStudent && (
-        <div className="mx-3 mb-3 rounded-xl border border-violet-200 bg-violet-50 p-3">
+        <div className="mx-3 mb-3 rounded-xl border border-violet-200 bg-violet-50 p-3 dark:border-slate-600 dark:bg-slate-800">
           <div className="mb-2 text-sm font-semibold">
             {selStudent.name} — {sel.date}
           </div>
@@ -197,7 +197,7 @@ export function AttendanceTab({
             placeholder="Reason… (for Excused)"
             value={note}
             onChange={(e) => setNote(e.target.value)}
-            className="mt-2 w-full rounded-lg border p-2 text-base"
+            className="mt-2 w-full rounded-lg border p-2 text-base dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 dark:placeholder-slate-400"
           />
           {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
         </div>

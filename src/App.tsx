@@ -11,6 +11,7 @@ import { TransparencyTab } from "./components/TransparencyTab";
 import { CalendarTab } from "./components/CalendarTab";
 import { AdminPanel } from "./components/AdminPanel";
 import { Calculator } from "./components/Calculator";
+import { DarkModeToggle } from "./components/DarkModeToggle";
 
 type View = "Attendance" | "Transparency" | "Calendar" | "Admin";
 
@@ -49,7 +50,7 @@ function NavItem({
         primary ? "px-4 py-3 text-base font-semibold" : "px-4 py-2 text-sm font-medium",
         active
           ? "bg-gradient-to-r from-violet-600 to-fuchsia-500 text-white shadow-md"
-          : "text-slate-600 hover:bg-violet-100/70",
+          : "text-slate-600 hover:bg-violet-100/70 dark:text-slate-300 dark:hover:bg-slate-800",
       ].join(" ")}
     >
       <span aria-hidden="true" className="text-xl leading-none">{emoji}</span>
@@ -75,10 +76,11 @@ export default function App() {
   if (role && status === "pending") {
     return (
       <div className="flex min-h-screen items-center justify-center p-4">
-        <div className="w-full max-w-sm rounded-2xl bg-white/80 p-8 text-center shadow-lg backdrop-blur">
+        <div className="relative w-full max-w-sm rounded-2xl bg-white/80 p-8 text-center shadow-lg backdrop-blur dark:bg-slate-800/80">
+          <div className="absolute right-3 top-3"><DarkModeToggle /></div>
           <div className="mb-3 text-4xl">⏳</div>
-          <h1 className="mb-2 text-xl font-bold text-violet-700">Waiting for approval</h1>
-          <p className="mb-6 text-sm text-slate-500">
+          <h1 className="mb-2 text-xl font-bold text-violet-700 dark:text-violet-300">Waiting for approval</h1>
+          <p className="mb-6 text-sm text-slate-500 dark:text-slate-400">
             Your account was created. An admin needs to approve it and give you a role before
             you can start entering data.
           </p>
@@ -104,7 +106,7 @@ export default function App() {
     const sidebar = (
       <div className="flex h-full flex-col gap-6 p-4">
         <div className="px-2">
-          <div className="text-lg font-bold leading-tight text-violet-700">{APP_NAME}</div>
+          <div className="text-lg font-bold leading-tight text-violet-700 dark:text-violet-300">{APP_NAME}</div>
         </div>
 
         <nav className="flex flex-col gap-2">
@@ -113,10 +115,10 @@ export default function App() {
         </nav>
 
         <div className="mt-2">
-          <div className="px-3 pb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">
+          <div className="px-3 pb-2 text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">
             Staff tools
           </div>
-          <nav className="flex flex-col gap-1 border-t border-violet-100 pt-3">
+          <nav className="flex flex-col gap-1 border-t border-violet-100 pt-3 dark:border-slate-700">
             <NavItem label="Calendar" emoji="🗓️" active={view === "Calendar"} onClick={() => go("Calendar")} />
             {admin && (
               <NavItem label="Admin" emoji="👑" active={view === "Admin"} onClick={() => go("Admin")} />
@@ -126,7 +128,7 @@ export default function App() {
 
         <button
           onClick={signOut}
-          className="mt-auto rounded-2xl px-4 py-2 text-sm font-medium text-slate-500 transition hover:bg-rose-50 hover:text-rose-600"
+          className="mt-auto rounded-2xl px-4 py-2 text-sm font-medium text-slate-500 transition hover:bg-rose-50 hover:text-rose-600 dark:text-slate-400 dark:hover:bg-rose-950/40"
         >
           Sign out
         </button>
@@ -136,7 +138,7 @@ export default function App() {
     return (
       <div className="min-h-screen sm:flex">
         {/* Desktop fixed sidebar */}
-        <aside className="hidden w-56 shrink-0 border-r border-violet-100 bg-white/70 backdrop-blur sm:block sm:fixed sm:inset-y-0 sm:left-0">
+        <aside className="hidden w-56 shrink-0 border-r border-violet-100 bg-white/70 backdrop-blur sm:block sm:fixed sm:inset-y-0 sm:left-0 dark:border-slate-700 dark:bg-slate-900/70">
           {sidebar}
         </aside>
 
@@ -147,7 +149,7 @@ export default function App() {
               className="fixed inset-0 z-40 bg-slate-900/30 sm:hidden"
               onClick={() => setDrawerOpen(false)}
             />
-            <aside className="fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-xl sm:hidden">
+            <aside className="fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-xl sm:hidden dark:bg-slate-900">
               {sidebar}
             </aside>
           </>
@@ -155,15 +157,16 @@ export default function App() {
 
         <div className="flex-1 sm:ml-56">
           {/* Slim top bar */}
-          <header className="sticky top-0 z-20 flex items-center gap-3 border-b border-violet-100 bg-white/70 px-3 py-2 backdrop-blur sm:px-6">
+          <header className="sticky top-0 z-20 flex items-center gap-3 border-b border-violet-100 bg-white/70 px-3 py-2 backdrop-blur sm:px-6 dark:border-slate-700 dark:bg-slate-900/70">
             <button
               aria-label="Open menu"
-              className="rounded-xl p-2 text-xl text-violet-700 hover:bg-violet-100 sm:hidden"
+              className="rounded-xl p-2 text-xl text-violet-700 hover:bg-violet-100 sm:hidden dark:text-violet-300 dark:hover:bg-slate-800"
               onClick={() => setDrawerOpen(true)}
             >
               ☰
             </button>
-            <strong className="text-violet-700">{APP_NAME}</strong>
+            <strong className="text-violet-700 dark:text-violet-300">{APP_NAME}</strong>
+            <DarkModeToggle className="ml-auto" />
           </header>
 
           <OfflineBanner />
@@ -187,9 +190,10 @@ export default function App() {
     return (
       <div className="min-h-screen pb-24">
         <OfflineBanner />
-        <header className="sticky top-0 z-20 border-b border-violet-100 bg-white/70 px-4 py-3 backdrop-blur">
-          <strong className="text-violet-700">{APP_NAME}</strong>
-          <span className="text-slate-500"> — guest: {guestName}</span>
+        <header className="sticky top-0 z-20 flex items-center border-b border-violet-100 bg-white/70 px-4 py-3 backdrop-blur dark:border-slate-700 dark:bg-slate-900/70">
+          <strong className="text-violet-700 dark:text-violet-300">{APP_NAME}</strong>
+          <span className="text-slate-500 dark:text-slate-400"> — guest: {guestName}</span>
+          <DarkModeToggle className="ml-auto" />
         </header>
         <main className="mx-auto max-w-5xl">
           <TransparencyTab mode="guest" />
@@ -204,13 +208,14 @@ export default function App() {
   if (guestMode) return <GuestGate onEnter={setGuestName} />;
   return (
     <div className="flex min-h-screen items-center justify-center p-4">
-      <div className="w-full max-w-sm rounded-2xl bg-white/80 p-8 shadow-lg backdrop-blur">
-        <h1 className="mb-1 text-center text-2xl font-bold text-violet-700">{APP_NAME}</h1>
-        <p className="mb-6 text-center text-sm text-slate-500">Welcome back 👋</p>
+      <div className="relative w-full max-w-sm rounded-2xl bg-white/80 p-8 shadow-lg backdrop-blur dark:bg-slate-800/80">
+        <div className="absolute right-3 top-3"><DarkModeToggle /></div>
+        <h1 className="mb-1 text-center text-2xl font-bold text-violet-700 dark:text-violet-300">{APP_NAME}</h1>
+        <p className="mb-6 text-center text-sm text-slate-500 dark:text-slate-400">Welcome back 👋</p>
         <AuthForm />
         <div className="mt-6 text-center">
           <button
-            className="text-sm font-medium text-violet-700 underline-offset-2 hover:underline"
+            className="text-sm font-medium text-violet-700 underline-offset-2 hover:underline dark:text-violet-300"
             onClick={() => setGuestMode(true)}
           >
             Continue as guest (view only)

@@ -3,6 +3,9 @@ import { render, screen, fireEvent } from "@testing-library/react";
 
 const { useAuth } = vi.hoisted(() => ({ useAuth: vi.fn() }));
 vi.mock("./context/AuthContext", () => ({ useAuth }));
+vi.mock("./context/ThemeContext", () => ({
+  useTheme: () => ({ personalDark: false, globalDark: false, effective: false, togglePersonal: vi.fn(), setGlobal: vi.fn() }),
+}));
 vi.mock("./components/AuthForm", () => ({ AuthForm: () => <div>AuthForm</div> }));
 vi.mock("./components/GuestGate", () => ({ GuestGate: () => <div>GuestGate</div> }));
 vi.mock("./components/AttendanceTab", () => ({ AttendanceTab: () => <div>AttendanceTab</div> }));
