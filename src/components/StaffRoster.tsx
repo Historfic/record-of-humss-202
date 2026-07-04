@@ -11,6 +11,9 @@ export function StaffRoster() {
 
   async function load() {
     const s = await listStaff();
+    // Show pending sign-ups first so the admin notices new people to approve.
+    const rank = { pending: 0, active: 1, revoked: 2 } as const;
+    s.sort((a, b) => rank[a.status] - rank[b.status] || a.email.localeCompare(b.email));
     setStaff(s);
     setDraft(Object.fromEntries(s.map((m) => [m.id, { role: m.role, title: m.title ?? "" }])));
   }
@@ -35,6 +38,14 @@ export function StaffRoster() {
     await load();
   }
 
+  // Approve a pending sign-up: save the chosen role/title, then activate them.
+  async function approve(m: Staff) {
+    const d = draft[m.id];
+    await setStaffRole(m.id, d.role, d.title);
+    await setStaffStatus(m.id, "active");
+    await load();
+  }
+
   async function resetPw(id: string) {
     const newPw = pw[id] ?? "";
     await resetStaffPassword(id, newPw);
@@ -47,13 +58,23 @@ export function StaffRoster() {
       <h2 className="mb-3 text-lg font-bold text-violet-700">Staff</h2>
       <ul className="flex flex-col gap-4">
         {staff.map((m) => (
-          <li key={m.id} className="rounded-2xl border border-violet-100 bg-white p-4 shadow-sm">
+          <li
+            key={m.id}
+            className={`rounded-2xl border bg-white p-4 shadow-sm ${
+              m.status === "pending" ? "border-amber-300 ring-2 ring-amber-100" : "border-violet-100"
+            }`}
+          >
             <div className="mb-2 flex items-center justify-between gap-2">
-              <p className="font-medium">{m.email}</p>
+              <p className="font-medium">
+                {m.email}
+                {m.status === "pending" && <span className="ml-2 text-xs text-amber-600">🆕 new sign-up</span>}
+              </p>
               <span
                 className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
                   m.status === "active"
                     ? "bg-emerald-100 text-emerald-700"
+                    : m.status === "pending"
+                    ? "bg-amber-100 text-amber-700"
                     : "bg-rose-100 text-rose-700"
                 }`}
               >
@@ -86,12 +107,21 @@ export function StaffRoster() {
             </label>
 
             <div className="mt-3 flex flex-wrap gap-2">
-              <button
-                className="rounded-full bg-gradient-to-r from-violet-600 to-fuchsia-500 px-4 py-1.5 text-sm font-medium text-white shadow-md"
-                onClick={() => save(m.id)}
-              >
-                Save {m.email}
-              </button>
+              {m.status === "pending" ? (
+                <button
+                  className="rounded-full bg-gradient-to-r from-emerald-500 to-green-600 px-4 py-1.5 text-sm font-medium text-white shadow-md"
+                  onClick={() => approve(m)}
+                >
+                  ✓ Approve as {draft[m.id]?.role}
+                </button>
+              ) : (
+                <button
+                  className="rounded-full bg-gradient-to-r from-violet-600 to-fuchsia-500 px-4 py-1.5 text-sm font-medium text-white shadow-md"
+                  onClick={() => save(m.id)}
+                >
+                  Save {m.email}
+                </button>
+              )}
               <button
                 className="rounded-full bg-white px-4 py-1.5 text-sm font-medium text-slate-600 shadow-sm hover:bg-violet-50"
                 onClick={() => toggleStatus(m)}

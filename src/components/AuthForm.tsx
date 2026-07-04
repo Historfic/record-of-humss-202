@@ -18,8 +18,8 @@ export function AuthForm() {
       const { data, error } = await supabase.auth.signUp({ email, password });
       if (error) { setError(error.message); return; }
       if (data.user) {
-        // create the staff profile row (defaults to auditor; admin assigns real role)
-        await supabase.from("users").insert({ id: data.user.id, email });
+        // create the staff profile row as PENDING — the admin approves + assigns a role.
+        await supabase.from("users").insert({ id: data.user.id, email, status: "pending" });
       }
     }
   }

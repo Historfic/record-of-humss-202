@@ -6,7 +6,7 @@ export interface Staff {
   email: string;
   role: Exclude<Role, "guest">;
   title: string | null;
-  status: "active" | "revoked";
+  status: "active" | "revoked" | "pending";
 }
 
 export async function listStaff(): Promise<Staff[]> {

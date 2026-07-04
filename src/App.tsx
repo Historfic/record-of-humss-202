@@ -59,7 +59,7 @@ function NavItem({
 }
 
 export default function App() {
-  const { role, guestName, loading, setGuestName, signOut } = useAuth();
+  const { role, status, guestName, loading, setGuestName, signOut } = useAuth();
   const [guestMode, setGuestMode] = useState(false);
   const [view, setView] = useState<View>("Attendance");
   const [calcOpen, setCalcOpen] = useState(false);
@@ -71,8 +71,30 @@ export default function App() {
 
   if (loading) return null;
 
+  // ---------- Signed in, but waiting for admin approval ----------
+  if (role && status === "pending") {
+    return (
+      <div className="flex min-h-screen items-center justify-center p-4">
+        <div className="w-full max-w-sm rounded-2xl bg-white/80 p-8 text-center shadow-lg backdrop-blur">
+          <div className="mb-3 text-4xl">⏳</div>
+          <h1 className="mb-2 text-xl font-bold text-violet-700">Waiting for approval</h1>
+          <p className="mb-6 text-sm text-slate-500">
+            Your account was created. An admin needs to approve it and give you a role before
+            you can start entering data.
+          </p>
+          <button
+            onClick={signOut}
+            className="text-sm font-medium text-slate-500 hover:text-rose-600"
+          >
+            Sign out
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   // ---------- Signed-in staff ----------
-  if (role) {
+  if (role && status !== "pending") {
     const admin = isAdmin(role as Role);
     const go = (v: View) => {
       setView(v);

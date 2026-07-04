@@ -31,6 +31,6 @@ describe("AuthForm", () => {
     await waitFor(() =>
       expect(signUp).toHaveBeenCalledWith({ email: "maria@x.com", password: "secret12" })
     );
-    expect(insert).toHaveBeenCalledWith({ id: "u1", email: "maria@x.com" });
+    expect(insert).toHaveBeenCalledWith({ id: "u1", email: "maria@x.com", status: "pending" });
   });
 });
