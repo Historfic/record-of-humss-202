@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
-import { getGlobalDark, setGlobalDark } from "../lib/settings";
+import { getGlobalDark, setGlobalDark, getMyDark } from "../lib/settings";
 
 interface ThemeState {
   personalDark: boolean;
@@ -16,12 +16,16 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     () => typeof localStorage !== "undefined" && localStorage.getItem("theme-dark") === "1",
   );
   const [globalDark, setGlobalDarkState] = useState<boolean>(false);
+  // Admin-assigned per-user theme: true=dark, false=light, null=let them choose.
+  const [assignedDark, setAssignedDark] = useState<boolean | null>(null);
 
   useEffect(() => {
     getGlobalDark().then(setGlobalDarkState).catch(() => {});
+    getMyDark().then(setAssignedDark).catch(() => {});
   }, []);
 
-  const effective = globalDark || personalDark;
+  // Global force wins; then an admin-assigned per-user theme; then the personal toggle.
+  const effective = globalDark ? true : assignedDark ?? personalDark;
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", effective);

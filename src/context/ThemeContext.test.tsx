@@ -1,11 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 
-const { getGlobalDark, setGlobalDark } = vi.hoisted(() => ({
+const { getGlobalDark, setGlobalDark, getMyDark } = vi.hoisted(() => ({
   getGlobalDark: vi.fn(),
   setGlobalDark: vi.fn(),
+  getMyDark: vi.fn(),
 }));
-vi.mock("../lib/settings", () => ({ getGlobalDark, setGlobalDark }));
+vi.mock("../lib/settings", () => ({ getGlobalDark, setGlobalDark, getMyDark }));
 
 import { ThemeProvider, useTheme } from "./ThemeContext";
 
@@ -21,6 +22,7 @@ beforeEach(() => {
   document.documentElement.classList.remove("dark");
   getGlobalDark.mockResolvedValue(false);
   setGlobalDark.mockResolvedValue(undefined);
+  getMyDark.mockResolvedValue(null);
 });
 
 describe("ThemeContext", () => {

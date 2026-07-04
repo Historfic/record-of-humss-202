@@ -1,22 +1,24 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 
-const { listStaff, setStaffRole, setStaffStatus } = vi.hoisted(() => ({
+const { listStaff, setStaffRole, setStaffStatus, setStaffDark } = vi.hoisted(() => ({
   listStaff: vi.fn(),
   setStaffRole: vi.fn(),
   setStaffStatus: vi.fn(),
+  setStaffDark: vi.fn(),
 }));
 const { resetStaffPassword } = vi.hoisted(() => ({ resetStaffPassword: vi.fn() }));
-vi.mock("../lib/staff", () => ({ listStaff, setStaffRole, setStaffStatus }));
+vi.mock("../lib/staff", () => ({ listStaff, setStaffRole, setStaffStatus, setStaffDark }));
 vi.mock("../lib/admin", () => ({ resetStaffPassword }));
 import { StaffRoster } from "./StaffRoster";
 
 beforeEach(() => {
   listStaff.mockResolvedValue([
-    { id: "u1", email: "t@x.com", role: "treasurer", title: "Treasurer", status: "active" },
+    { id: "u1", email: "t@x.com", role: "treasurer", title: "Treasurer", status: "active", dark_mode: null },
   ]);
   setStaffRole.mockResolvedValue(undefined);
   setStaffStatus.mockResolvedValue(undefined);
+  setStaffDark.mockResolvedValue(undefined);
   resetStaffPassword.mockResolvedValue(undefined);
 });
 
@@ -40,6 +42,13 @@ describe("StaffRoster", () => {
     await screen.findByText("t@x.com");
     fireEvent.click(screen.getByRole("button", { name: "Revoke" }));
     await waitFor(() => expect(setStaffStatus).toHaveBeenCalledWith("u1", "revoked"));
+  });
+
+  it("assigning a theme calls setStaffDark", async () => {
+    render(<StaffRoster />);
+    await screen.findByText("t@x.com");
+    fireEvent.change(screen.getByLabelText("Theme for t@x.com"), { target: { value: "dark" } });
+    await waitFor(() => expect(setStaffDark).toHaveBeenCalledWith("u1", true));
   });
 
   it("entering a new password and clicking reset calls resetStaffPassword", async () => {

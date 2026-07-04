@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { listStaff, setStaffRole, setStaffStatus } from "../lib/staff";
+import { listStaff, setStaffRole, setStaffStatus, setStaffDark } from "../lib/staff";
 import type { Staff } from "../lib/staff";
 import { resetStaffPassword } from "../lib/admin";
 
@@ -43,6 +43,11 @@ export function StaffRoster() {
     const d = draft[m.id];
     await setStaffRole(m.id, d.role, d.title);
     await setStaffStatus(m.id, "active");
+    await load();
+  }
+
+  async function changeTheme(id: string, value: boolean | null) {
+    await setStaffDark(id, value);
     await load();
   }
 
@@ -129,6 +134,23 @@ export function StaffRoster() {
                 {m.status === "active" ? "Revoke" : "Restore"}
               </button>
             </div>
+
+            <label className="mt-3 block text-sm">
+              Theme for {m.email}
+              <select
+                aria-label={`Theme for ${m.email}`}
+                className="mt-1 w-full rounded-xl border border-violet-100 p-2 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100"
+                value={m.dark_mode === null ? "auto" : m.dark_mode ? "dark" : "light"}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  void changeTheme(m.id, v === "auto" ? null : v === "dark");
+                }}
+              >
+                <option value="auto">Auto (they choose)</option>
+                <option value="light">Force light</option>
+                <option value="dark">Force dark</option>
+              </select>
+            </label>
 
             <div className="mt-3 flex flex-wrap items-end gap-2">
               <label className="text-sm">
