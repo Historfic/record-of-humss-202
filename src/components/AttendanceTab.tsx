@@ -1,10 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { listStudents } from "../lib/students";
-import {
-  listAttendanceBetween,
-  setAttendance,
-  statusForDate,
-} from "../lib/attendance";
+import { listAttendanceBetween, setAttendance } from "../lib/attendance";
 import type { AttStatus, AttendanceRecord } from "../lib/attendance";
 import { weekdaysOfMonth, monthLabel, shiftMonth } from "../lib/dates";
 
@@ -24,6 +20,8 @@ const STATUS_META: Record<AttStatus, { label: string; letter: string; bg: string
 const STATUS_ORDER: AttStatus[] = ["present", "absent", "excused", "cutting"];
 
 const now = new Date();
+const todayIso = now.toISOString().slice(0, 10);
+const pad2 = (n: number) => String(n).padStart(2, "0");
 
 export function AttendanceTab({
   initialYear = now.getFullYear(),
@@ -95,10 +93,28 @@ export function AttendanceTab({
   return (
     <div className="flex flex-col">
       <div className="sticky top-0 z-20 flex flex-col gap-2 bg-white/90 p-3 shadow backdrop-blur">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-2">
           <button onClick={() => move(-1)} className="rounded-lg bg-slate-100 px-3 py-1 text-lg">‹</button>
           <span data-testid="att-month" className="font-semibold">{monthLabel(year, monthIndex)}</span>
           <button onClick={() => move(1)} className="rounded-lg bg-slate-100 px-3 py-1 text-lg">›</button>
+        </div>
+        <div className="flex items-center gap-2">
+          <input
+            type="month"
+            aria-label="Jump to month"
+            value={`${year}-${pad2(monthIndex + 1)}`}
+            onChange={(e) => {
+              const [y, m] = e.target.value.split("-").map(Number);
+              if (y && m) { setYear(y); setMonthIndex(m - 1); setSel(null); }
+            }}
+            className="flex-1 rounded-lg border p-1.5 text-sm"
+          />
+          <button
+            onClick={() => { setYear(now.getFullYear()); setMonthIndex(now.getMonth()); setSel(null); }}
+            className="rounded-lg bg-violet-100 px-3 py-1.5 text-sm font-medium text-violet-700"
+          >
+            Today
+          </button>
         </div>
         <input
           type="search"
@@ -134,17 +150,22 @@ export function AttendanceTab({
                   {student.name}
                 </td>
                 {days.map((d) => {
-                  const status = statusForDate(records, student.id, d);
-                  const meta = STATUS_META[status];
+                  const rec = records.find((r) => r.student_id === student.id && r.date === d);
+                  const isFuture = d > todayIso;
+                  // Future days have no status yet; past/today default to Present.
+                  const status: AttStatus | null = rec ? rec.status : isFuture ? null : "present";
+                  const meta = status ? STATUS_META[status] : null;
                   return (
                     <td key={d} className="border-b border-l border-slate-100 p-0.5">
                       <button
                         data-testid={`att-cell-${student.id}-${d}`}
                         onClick={() => { setSel({ studentId: student.id, date: d }); setNote(""); setError(null); }}
-                        className={`h-8 w-8 rounded text-[11px] font-bold text-white ${meta.bg}`}
-                        title={`${student.name} — ${d} — ${meta.label}`}
+                        className={`h-8 w-8 rounded text-[11px] font-bold ${
+                          meta ? `text-white ${meta.bg}` : "bg-slate-100 text-slate-300"
+                        }`}
+                        title={`${student.name} — ${d}${meta ? " — " + meta.label : ""}`}
                       >
-                        {meta.letter}
+                        {meta ? meta.letter : ""}
                       </button>
                     </td>
                   );
