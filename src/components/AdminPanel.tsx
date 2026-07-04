@@ -4,9 +4,46 @@ import { Ledger } from "./Ledger";
 import { createStaff } from "../lib/admin";
 import { listGuestVisits } from "../lib/guest";
 import type { GuestVisit } from "../lib/guest";
+import { listAudit, describeAudit } from "../lib/audit";
+import type { AuditEntry } from "../lib/audit";
 import { useTheme } from "../context/ThemeContext";
 
-type SubTab = "Staff" | "Add staff" | "Who viewed" | "History" | "Appearance";
+type SubTab = "Staff" | "Add staff" | "Activity" | "Who viewed" | "History" | "Appearance";
+
+function Activity() {
+  const [entries, setEntries] = useState<AuditEntry[]>([]);
+
+  useEffect(() => {
+    listAudit().then(setEntries).catch(() => {});
+  }, []);
+
+  return (
+    <div className="p-4">
+      <h2 className="mb-3 text-lg font-bold text-violet-700 dark:text-violet-300">
+        Activity — who changed what
+      </h2>
+      {entries.length === 0 && (
+        <p className="text-sm text-slate-400">No changes recorded yet.</p>
+      )}
+      <ul className="flex flex-col gap-2">
+        {entries.map((e) => (
+          <li
+            key={e.id}
+            className="flex items-center justify-between gap-3 rounded-2xl border border-violet-100 bg-white p-3 shadow-sm dark:border-slate-700 dark:bg-slate-800"
+          >
+            <span className="min-w-0">
+              <span className="font-medium">{e.actor_email ?? "system"}</span>{" "}
+              <span className="text-slate-600 dark:text-slate-300">{describeAudit(e)}</span>
+            </span>
+            <span className="shrink-0 text-xs text-slate-500 dark:text-slate-400">
+              {new Date(e.at).toLocaleString()}
+            </span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
 
 function Appearance() {
   const { globalDark, setGlobal } = useTheme();
@@ -142,7 +179,7 @@ function WhoViewed() {
 
 export function AdminPanel() {
   const [sub, setSub] = useState<SubTab>("Staff");
-  const tabs: SubTab[] = ["Staff", "Add staff", "Who viewed", "History", "Appearance"];
+  const tabs: SubTab[] = ["Staff", "Add staff", "Activity", "Who viewed", "History", "Appearance"];
 
   return (
     <div>
@@ -167,6 +204,7 @@ export function AdminPanel() {
       <div>
         {sub === "Staff" && <StaffRoster />}
         {sub === "Add staff" && <AddStaffForm />}
+        {sub === "Activity" && <Activity />}
         {sub === "Who viewed" && <WhoViewed />}
         {sub === "History" && <Ledger />}
         {sub === "Appearance" && <Appearance />}
